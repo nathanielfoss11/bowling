@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Container, Col, Row, Button } from 'react-bootstrap';
 
 class BowlingGame extends React.Component {
@@ -21,30 +20,27 @@ class BowlingGame extends React.Component {
       10: [],
       spare: false,
       strikeStreak: 0,
+      strikeThrows: [],
     }
     this.handlePinClick = this.handlePinClick.bind(this);
-    this.handleSpare = this.handleSpare.bind(this);
-  }
-
-  handleSpare() {
-    let currentFrame = this.state[this.state.frame];
-    let lastFrame = this.state.frame - 1;
-    let lastFrameScore = 10 + value;
-    let newScore =  lastFrameScore + this.state.score;
-    this.setState({lastFrame: newScore});
-    this.setState({ball: 2});
-    this.setState({currentFrame: frame});
   }
 
   handlePinClick(event) {
+    let emptyArr = [];
     let value = Number(event.target.value);
+    let currentFrame = this.state.frame;
     let newFrame = this.state.frame + 1;
     let frameScore = this.state[this.state.frame][0] + value;
     let frame = this.state[this.state.frame];
+    let strikeThrow = this.state.strikeThrows
     frame.push(Number(value));
+    if(this.state.strikeStreak > 0) {
+      strikeThrow.push(value);
+      this.setState({strikeThrows: strikeThrow});
+    }
     if (this.state.ball === 1 && value < 10 && this.state.spare === false) {
       this.setState({ball: 2});
-      this.setState({currentFrame: frame});
+      this.setState({[currentFrame]: frame});
 
     } else if (this.state.ball === 1 && this.state.spare === true) {
       let lastFrameScore = 10 + value;
@@ -55,6 +51,11 @@ class BowlingGame extends React.Component {
 
     } else if (this.state.ball === 1 && value === 10) {
       let strikeStreak = this.state.strikeStreak + 1;
+      if(this.state.strikeStreak === 0) {
+        let strikeThrow = this.state.strikeThrows
+        strikeThrow.push(value);
+      }
+      frame.push(0);
       this.setState({frame: newFrame});
       this.setState({strikeStreak: strikeStreak});
 
@@ -65,50 +66,57 @@ class BowlingGame extends React.Component {
       this.setState({strikeStreak: 0});
       this.setState({score: newScore});
       this.setState({ball: 1});
+      this.setState({strikeThrows: emptyArr});
 
-    } else if(this.state.ball === 2 && this.state.strikeStreak > 1){
+    } else if(this.state.ball === 2 && this.state.strikeStreak > 1 && frameScore < 10){
       let streak = this.state.strikeStreak;
-      while (streak > 0) {
-        let strikeFrame = this.state.frame - streak;
-        let strikeFrameScore = this.state[strikeFrame][0] + this.state[strikeFrame][1]
-        let newScore =  lastFrameScore + frameScore + this.state.score;
-        this.setState({strikeFrame: strikeFrame});
-        }
-      let lastFrameScore = 10 + frameScore;
-      let newScore =  lastFrameScore + frameScore + this.state.score;
+      let newScore = this.state.score;
+      for (let i = 1; i < strikeThrow.length - 2; i++) {
+        newScore += strikeThrow[i] + strikeThrow[i++] + 10
+      }
+      this.setState({score: newScore})
       this.setState({frame: newFrame});
       this.setState({strikeStreak: 0});
       this.setState({ball: 1});
+      this.setState({strikeThrows: emptyArr});
 
     } else if (this.state.ball === 2 && frameScore === 10) {
+      let newScore = this.state.score
+      if(this.state.strikeStreak > 0){
+        for (let i = 1; i < strikeThrow.length - 1; i++) {
+          newScore += strikeThrow[i] + strikeThrow[i+1] + 10
+          console.log(strikeThrow[i])
+          console.log(strikeThrow[i+1])
+        }
+        this.setState({score: newScore})
+      }
       this.setState({spare: true});
       this.setState({frame: newFrame});
       this.setState({ball: 1});
-
     } else {
       let newScore = frame[0] + frame[1] + this.state.score;
       this.setState({score: newScore});
-      this.setState({currentFrame: frame});
+      this.setState({[currentFrame]: frame});
       this.setState({ball: 1});
       this.setState({frame: newFrame});
       this.setState({spare: false});
       this.setState({strikeStreak: 0});
-
+      this.setState({strikeThrows: emptyArr});
     }
   }
 
   render() {
-    let frame1, frame2, frame3, frame4, frame5, frame6, frame7, frame8, frame9, frame10, frame1Score, frame2Score, frame3Score, frame4Score, frame5Score, frame6Score, frame7Score, frame8Score, frame9Score, frame10Score, frame, score, ball;
-    frame1 = <p>{this.state[1][0] + ` - ${this.state[1][1]}`}</p>
-    frame2 = <p>{this.state[2][0]} - {this.state[2][1]}</p>
-    frame3 = <p>{this.state[3][0]} - {this.state[3][1]}</p>
-    frame4 = <p>{this.state[4][0]} - {this.state[4][1]}</p>
-    frame5 = <p>{this.state[5][0]} - {this.state[5][1]}</p>
-    frame6 = <p>{this.state[6][0]} - {this.state[6][1]}</p>
-    frame7 = <p>{this.state[7][0]} - {this.state[7][1]}</p>
-    frame8 = <p>{this.state[8][0]} - {this.state[8][1]}</p>
-    frame9 = <p>{this.state[9][0]} - {this.state[9][1]}</p>
-    frame10 = <p>{this.state[10][0]} - {this.state[10][1]}</p>
+    let frame1Score, frame2Score, frame3Score, frame4Score, frame5Score, frame6Score, frame7Score, frame8Score, frame9Score, frame10Score, frame, score, ball;
+    let frame1 = <p>{this.state[1][0] + ` - ${this.state[1][1]}`}</p>
+    let frame2 = <p>{this.state[2][0]} - {this.state[2][1]}</p>
+    let frame3 = <p>{this.state[3][0]} - {this.state[3][1]}</p>
+    let frame4 = <p>{this.state[4][0]} - {this.state[4][1]}</p>
+    let frame5 = <p>{this.state[5][0]} - {this.state[5][1]}</p>
+    let frame6 = <p>{this.state[6][0]} - {this.state[6][1]}</p>
+    let frame7 = <p>{this.state[7][0]} - {this.state[7][1]}</p>
+    let frame8 = <p>{this.state[8][0]} - {this.state[8][1]}</p>
+    let frame9 = <p>{this.state[9][0]} - {this.state[9][1]}</p>
+    let frame10 = <p>{this.state[10][0]} - {this.state[10][1]}</p>
     if(this.state.frame > 1) {
       frame1Score = <p>{this.state[1][0] + this.state[1][1]}</p>
     }
@@ -149,9 +157,9 @@ class BowlingGame extends React.Component {
     return (
       <Container>
         <Col>
-        <Row>
-          <h1>Bowling Game</h1>
-        </Row>
+          <Row>
+            <h1>Bowling Game</h1>
+          </Row>
         <Row>
           <Col>
             {score}
@@ -278,50 +286,49 @@ class BowlingGame extends React.Component {
             <br />
             <br />
         <Row>
-              <Col>
-                <Button onClick={this.handlePinClick} value={1}>1</Button>
-              </Col>
-              <Col>
-                <Button onClick={this.handlePinClick} value={2}>2</Button>
-              </Col>
-              <Col>
-                <Button onClick={this.handlePinClick} value={3}>3</Button>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Button onClick={this.handlePinClick} value={4}>4</Button>
-              </Col>
-              <Col>
-                <Button onClick={this.handlePinClick} value={5}>5</Button>
-              </Col>
-              <Col>
-                <Button onClick={this.handlePinClick} value={6}>6</Button>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Button onClick={this.handlePinClick} value={7}>7</Button>
-              </Col>
-              <Col>
-                <Button onClick={this.handlePinClick} value={8}>8</Button>
-              </Col>
-              <Col>
-                <Button onClick={this.handlePinClick} value={9}>9</Button>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Button onClick={this.handlePinClick} value={10}>10</Button>
-              </Col>
-
-              <Col>
-                <Button onClick={this.handlePinClick} value={0}>0</Button>
-              </Col>
-              <Col>
-                &nbsp;
-              </Col>
+          <Col>
+            <Button onClick={this.handlePinClick} value={1}>1</Button>
+          </Col>
+          <Col>
+            <Button onClick={this.handlePinClick} value={2}>2</Button>
+          </Col>
+          <Col>
+            <Button onClick={this.handlePinClick} value={3}>3</Button>
+          </Col>
         </Row>
+          <Row>
+            <Col>
+              <Button onClick={this.handlePinClick} value={4}>4</Button>
+            </Col>
+            <Col>
+              <Button onClick={this.handlePinClick} value={5}>5</Button>
+            </Col>
+            <Col>
+              <Button onClick={this.handlePinClick} value={6}>6</Button>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <Button onClick={this.handlePinClick} value={7}>7</Button>
+            </Col>
+            <Col>
+              <Button onClick={this.handlePinClick} value={8}>8</Button>
+            </Col>
+            <Col>
+              <Button onClick={this.handlePinClick} value={9}>9</Button>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <Button onClick={this.handlePinClick} value={10}>10</Button>
+            </Col>
+            <Col>
+              <Button onClick={this.handlePinClick} value={0}>0</Button>
+            </Col>
+            <Col>
+              &nbsp;
+            </Col>
+          </Row>
         </Col>
       </Container>
     )
