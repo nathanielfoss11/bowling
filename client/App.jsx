@@ -38,70 +38,158 @@ class BowlingGame extends React.Component {
       strikeThrow.push(value);
       this.setState({strikeThrows: strikeThrow});
     }
+    if(this.state.frame === 10){
+      if (value === 10) {
+        let strikeStreak = this.state.strikeStreak + 1;
+        if(this.state.strikeStreak === 0) {
+          let strikeThrow = this.state.strikeThrows;
+          strikeThrow.push(value);
+        }
+        frame.push(0);
+        this.setState({strikeStreak: strikeStreak});
+        if(this.state.ball === 1){
+          this.setState({ball: 2})
+        } else if (this.state.ball === 2) {
+          this.setState({ball: 3})
+        } else {
+          let streak = this.state.strikeStreak;
+          let newScore = this.state.score;
+          for (let i = 1; i < strikeThrow.length - 1; i++) {
+            newScore += strikeThrow[i] + strikeThrow[i++] + 10
+          }
+          this.setState({score: newScore})
+          this.setState({frame: newFrame});
+          this.setState({strikeStreak: 0});
+          this.setState({ball: 1});
+          this.setState({strikeThrows: emptyArr});
+        }
+
+      } else if (this.state.ball === 1 && this.state.spare === true) {
+        let lastFrameScore = 10 + value;
+        let newScore =  lastFrameScore + this.state.score;
+        this.setState({spare: false});
+        this.setState({score: newScore});
+        this.setState({ball: 2});
+        this.setState({[currentFrame]: frame});
+
+      } else if (this.state.ball === 2 && frameScore === 10) {
+        ('run ball 3')
+        let newScore = this.state.score
+        if(this.state.strikeStreak > 0){
+          for (let i = 1; i < strikeThrow.length - 1; i++) {
+            newScore += strikeThrow[i] + strikeThrow[i+1] + 10
+          }
+          this.setState({score: newScore})
+        }
+        this.setState({spare: true});
+        this.setState({ball: 3});
+        this.setState({strikeThrows: emptyArr});
+        this.setState({strikeStreak: 0});
+        this.setState({[currentFrame]: frame});
+
+      } else if(this.state.ball === 2 && this.state.strikeStreak > 1 && frameScore < 10){
+        console.log('strike open')
+          let streak = this.state.strikeStreak;
+          let newScore = this.state.score;
+          for (let i = 1; i < strikeThrow.length - 1; i++) {
+            newScore += strikeThrow[i] + strikeThrow[i++] + 10
+          }
+          this.setState({score: newScore})
+          this.setState({strikeStreak: 0});
+          this.setState({ball: 3});
+          this.setState({strikeThrows: emptyArr});
+  
+          //Spare
+      } else if (this.state.ball === 1 && value < 10 && this.state.spare === false) {
+        this.setState({ball: 2});
+        this.setState({[currentFrame]: frame});
+  
+      } else {
+        let newScore = frame[0] + frame[1] + this.state.score;
+        this.setState({score: newScore});
+        this.setState({[currentFrame]: frame});
+        this.setState({frame: newFrame});
+      }
+    }
+
     if (this.state.ball === 1 && value < 10 && this.state.spare === false) {
       this.setState({ball: 2});
       this.setState({[currentFrame]: frame});
 
     } else if (this.state.ball === 1 && this.state.spare === true) {
-      let lastFrameScore = 10 + value;
-      let newScore =  lastFrameScore + this.state.score;
-      this.setState({spare: false});
-      this.setState({score: newScore});
-      this.setState({ball: 2});
+      console.log('spare next frame')
+        let lastFrameScore = 10 + value;
+        let newScore =  lastFrameScore + this.state.score;
+        this.setState({spare: false});
+        this.setState({score: newScore});
+        this.setState({ball: 2});
 
+        //Strike
     } else if (this.state.ball === 1 && value === 10) {
-      let strikeStreak = this.state.strikeStreak + 1;
-      if(this.state.strikeStreak === 0) {
-        let strikeThrow = this.state.strikeThrows
-        strikeThrow.push(value);
-      }
-      frame.push(0);
-      this.setState({frame: newFrame});
-      this.setState({strikeStreak: strikeStreak});
+      console.log('strike')
+        let strikeStreak = this.state.strikeStreak + 1;
+        if(this.state.strikeStreak === 0) {
+          let strikeThrow = this.state.strikeThrows;
+          strikeThrow.push(value);
+        }
+        frame.push(0);
+        this.setState({frame: newFrame});
+        this.setState({strikeStreak: strikeStreak});
 
+        //Strike Streak End After 1
     } else if(this.state.ball === 2 && this.state.strikeStreak === 1){
-      let lastFrameScore = 10 + frameScore;
-      let newScore =  lastFrameScore + frameScore + this.state.score;
-      this.setState({frame: newFrame});
-      this.setState({strikeStreak: 0});
-      this.setState({score: newScore});
-      this.setState({ball: 1});
-      this.setState({strikeThrows: emptyArr});
+      console.log('strike end one')
+        let lastFrameScore = 10 + frameScore;
+        let newScore =  lastFrameScore + frameScore + this.state.score;
+        this.setState({frame: newFrame});
+        this.setState({score: newScore});
+        this.setState({ball: 1});
+        this.setState({strikeThrows: emptyArr});
+        this.setState({strikeStreak: 0});
 
+        //Strike Streak Open Frame
     } else if(this.state.ball === 2 && this.state.strikeStreak > 1 && frameScore < 10){
-      let streak = this.state.strikeStreak;
-      let newScore = this.state.score;
-      for (let i = 1; i < strikeThrow.length - 2; i++) {
-        newScore += strikeThrow[i] + strikeThrow[i++] + 10
-      }
-      this.setState({score: newScore})
-      this.setState({frame: newFrame});
-      this.setState({strikeStreak: 0});
-      this.setState({ball: 1});
-      this.setState({strikeThrows: emptyArr});
-
-    } else if (this.state.ball === 2 && frameScore === 10) {
-      let newScore = this.state.score
-      if(this.state.strikeStreak > 0){
+      console.log('strike open')
+        let streak = this.state.strikeStreak;
+        let newScore = this.state.score;
         for (let i = 1; i < strikeThrow.length - 1; i++) {
-          newScore += strikeThrow[i] + strikeThrow[i+1] + 10
-          console.log(strikeThrow[i])
-          console.log(strikeThrow[i+1])
+          newScore += strikeThrow[i] + strikeThrow[i++] + 10
         }
         this.setState({score: newScore})
-      }
-      this.setState({spare: true});
-      this.setState({frame: newFrame});
-      this.setState({ball: 1});
+        this.setState({frame: newFrame});
+        this.setState({strikeStreak: 0});
+        this.setState({ball: 1});
+        this.setState({strikeThrows: emptyArr});
+
+        //Spare
+    } else if (this.state.ball === 2 && frameScore === 10) {
+      console.log('spare')
+        let newScore = this.state.score
+        if(this.state.strikeStreak > 0){
+          for (let i = 1; i < strikeThrow.length - 1; i++) {
+            newScore += strikeThrow[i] + strikeThrow[i+1] + 10
+            console.log(strikeThrow[i])
+            console.log(strikeThrow[i+1])
+          }
+          this.setState({score: newScore})
+        }
+        this.setState({spare: true});
+        this.setState({frame: newFrame});
+        this.setState({ball: 1});
+        this.setState({strikeThrows: emptyArr});
+        this.setState({strikeStreak: 0});
+        //open frame
     } else {
-      let newScore = frame[0] + frame[1] + this.state.score;
-      this.setState({score: newScore});
-      this.setState({[currentFrame]: frame});
-      this.setState({ball: 1});
-      this.setState({frame: newFrame});
-      this.setState({spare: false});
-      this.setState({strikeStreak: 0});
-      this.setState({strikeThrows: emptyArr});
+        let newScore = frame[0] + frame[1] + this.state.score;
+        console.log('run')
+        console.log(newScore)
+        this.setState({score: newScore});
+        this.setState({[currentFrame]: frame});
+        this.setState({ball: 1});
+        this.setState({frame: newFrame});
+        this.setState({spare: false});
+        this.setState({strikeStreak: 0});
+        this.setState({strikeThrows: emptyArr});
     }
   }
 
@@ -116,7 +204,7 @@ class BowlingGame extends React.Component {
     let frame7 = <p>{this.state[7][0]} - {this.state[7][1]}</p>
     let frame8 = <p>{this.state[8][0]} - {this.state[8][1]}</p>
     let frame9 = <p>{this.state[9][0]} - {this.state[9][1]}</p>
-    let frame10 = <p>{this.state[10][0]} - {this.state[10][1]}</p>
+    let frame10 = <p>{this.state[10][0]} - {this.state[10][1]} - {this.state[10][2]}</p>
     if(this.state.frame > 1) {
       frame1Score = <p>{this.state[1][0] + this.state[1][1]}</p>
     }
